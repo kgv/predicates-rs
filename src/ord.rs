@@ -10,9 +10,7 @@
 
 use std::fmt;
 
-use crate::reflection;
-use crate::utils;
-use crate::Predicate;
+use crate::{reflection, utils, Predicate};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum EqOps {
@@ -83,6 +81,51 @@ where
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "var {} {:?}", self.op, self.constant)
+    }
+}
+
+#[cfg(feature = "unstable")]
+impl<T> FnOnce<(&T,)> for EqPredicate<T>
+where
+    T: fmt::Debug + PartialEq,
+{
+    type Output = bool;
+
+    extern "rust-call" fn call_once(self, args: (&T,)) -> Self::Output {
+        self.call(args)
+    }
+}
+
+#[cfg(feature = "unstable")]
+impl<T> FnMut<(&T,)> for EqPredicate<T>
+where
+    T: fmt::Debug + PartialEq,
+{
+    extern "rust-call" fn call_mut(&mut self, args: (&T,)) -> Self::Output {
+        self.call(args)
+    }
+}
+
+#[cfg(feature = "unstable")]
+impl<T> Fn<(&T,)> for EqPredicate<T>
+where
+    T: fmt::Debug + PartialEq,
+{
+    extern "rust-call" fn call(&self, args: (&T,)) -> Self::Output {
+        self.eval(args.0)
+    }
+}
+
+#[cfg(all(feature = "unstable", test))]
+mod tests {
+    use crate::prelude::predicate::eq;
+    use std::error::Error;
+
+    #[test]
+    fn default() -> Result<(), Box<dyn Error>> {
+        let a = Some(5);
+        assert!(a.filter(eq(5)).is_some());
+        Ok(())
     }
 }
 

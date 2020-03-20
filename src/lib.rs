@@ -201,6 +201,9 @@
 //! [`str_pred.normalize`]: prelude/trait.PredicateStrExt.html#method.normalize
 //! [`str_pred.trim`]: prelude/trait.PredicateStrExt.html#method.trim
 
+#![cfg_attr(feature = "unstable", feature(fn_traits))]
+#![cfg_attr(feature = "unstable", feature(unboxed_closures))]
+
 #![warn(missing_docs, missing_debug_implementations)]
 
 pub mod prelude;
